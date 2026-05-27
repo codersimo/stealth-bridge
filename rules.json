@@ -1,0 +1,167 @@
+[
+  {
+    "id": "a1000000-0000-0000-0000-000000000001",
+    "name": "card_cvn + __e.card_cvn (request body)",
+    "priority": 10,
+    "enabled": false,
+    "phase": "request",
+    "match": {},
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "card_cvn=[^&]*&?(?:__e\\.card_cvn=[^&]*&?)?",
+      "replace": "",
+      "case_insensitive": false
+    }
+  },
+  {
+    "id": "a1000000-0000-0000-0000-000000000002",
+    "name": "Response 200 \u2192 302 CyberSource 3DS redirect",
+    "priority": 20,
+    "enabled": false,
+    "phase": "response",
+    "match": {},
+    "action": {
+      "type": "modify_response",
+      "status": 302,
+      "headers": {
+        "location": "https://secureacceptance.cybersource.com/payer_authentication/hybrid?ccaAction=load",
+        "pragma": ""
+      }
+    }
+  },
+  {
+    "id": "a1000000-0000-0000-0000-000000000010",
+    "name": "CVV/CV2/CVC/CVN \u2014 URL-encoded form body",
+    "priority": 30,
+    "enabled": true,
+    "phase": "request",
+    "match": {
+      "method": "POST"
+    },
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "(?:cvv2?|cv2|cvc2?|cvn|card_?security_?code|security_?code|verification_?value)=[^&]*(?:&|$)",
+      "replace": "",
+      "case_insensitive": true
+    }
+  },
+  {
+    "id": "a1000000-0000-0000-0000-000000000011",
+    "name": "CVV/CV2/CVC/CVN \u2014 JSON body",
+    "priority": 31,
+    "enabled": true,
+    "phase": "request",
+    "match": {
+      "method": "POST"
+    },
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "(\"(?:cvv2?|cv2|cvc2?|cvn|card_?security_?code|security_?code|verification_?value)\"\\s*:\\s*)\"[^\"]*\"",
+      "replace": "\\1\"\"",
+      "case_insensitive": true
+    }
+  },
+  {
+    "id": "a1000000-0000-0000-0000-000000000012",
+    "name": "Strip CVV/CV2/CVC \u2014 request header (x-cvv, x-cv2)",
+    "priority": 32,
+    "enabled": false,
+    "phase": "request",
+    "match": {},
+    "action": {
+      "type": "match_replace",
+      "target": "request_header",
+      "header_name": "x-cvv",
+      "match": ".*",
+      "replace": "",
+      "case_insensitive": true
+    }
+  },
+  {
+    "id": "a1000000-0000-0000-0000-000000000013",
+    "name": "Strip CVV/CV2/CVC \u2014 request header (x-cv2)",
+    "priority": 33,
+    "enabled": false,
+    "phase": "request",
+    "match": {},
+    "action": {
+      "type": "match_replace",
+      "target": "request_header",
+      "header_name": "x-cv2",
+      "match": ".*",
+      "replace": "",
+      "case_insensitive": true
+    }
+  },
+  {
+    "name": "booking",
+    "priority": 100,
+    "enabled": false,
+    "phase": "request",
+    "match": {
+      "method": "POST"
+    },
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "\"cvc\":\"111\",",
+      "replace": "done",
+      "case_insensitive": true
+    },
+    "id": "f6af4cbc-5f17-4aca-8089-e30861658ca3"
+  },
+  {
+    "name": "booking",
+    "priority": 100,
+    "enabled": false,
+    "phase": "both",
+    "match": {},
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "\"cvc\":\"111\",",
+      "replace": "",
+      "case_insensitive": true
+    },
+    "id": "a8f708cc-ab56-4b9a-b0f6-ffaea596f3ea"
+  },
+  {
+    "name": "qatarairways",
+    "priority": 100,
+    "enabled": true,
+    "phase": "request",
+    "match": {
+      "method": "POST",
+      "url_pattern": "https://pg.qatarairways.com/cpg/public/validateCredentials"
+    },
+    "action": {
+      "type": "match_replace",
+      "target": "request_body",
+      "match": "=111",
+      "replace": "=",
+      "case_insensitive": true
+    },
+    "id": "f0f22f56-cf40-4f3c-9857-c598cf8e64b4"
+  },
+  {
+    "name": "qatarairways",
+    "priority": 100,
+    "enabled": true,
+    "phase": "response",
+    "match": {
+      "method": "POST",
+      "url_pattern": "https://pg.qatarairways.com/cpg/public/validateCredentials"
+    },
+    "action": {
+      "type": "match_replace",
+      "target": "response_body",
+      "match": "{\n    \"cvvCodeMasked\": \"Please enter the correct CVV number for your card.\",\n    \"cvvCode\": \"Please enter the correct CVV number for your card.\"\n}",
+      "replace": "{\n    \"valid\":\"TRUE\"\n}",
+      "case_insensitive": true
+    },
+    "id": "e7c36617-f411-4b61-b948-caf628e1b3f1"
+  }
+]
